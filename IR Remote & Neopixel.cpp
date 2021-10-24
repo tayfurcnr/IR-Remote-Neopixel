@@ -127,7 +127,7 @@
       Serial.println("System is ready!");
 
     // Initial State = Rainbow Format
-    incomingCommand = '7';
+    incomingCommand = 'O';
   }
 
   void loop() {

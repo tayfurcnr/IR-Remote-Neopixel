@@ -94,6 +94,7 @@
   char incomingCommand;
 
   bool MOTOR_STATE = false;
+
   // Definition for DEBUG (True = 1 or False = 0)
   #define DEBUG 0
 
@@ -126,7 +127,7 @@
     if (DEBUG)
       Serial.println("System is ready!");
 
-    // Initial State = Rainbow Format
+    // Initial State - LED Off
     incomingCommand = 'O';
   }
 

@@ -94,7 +94,6 @@
   char incomingCommand;
 
   bool MOTOR_STATE = false;
-
   // Definition for DEBUG (True = 1 or False = 0)
   #define DEBUG 0
 
@@ -127,7 +126,7 @@
     if (DEBUG)
       Serial.println("System is ready!");
 
-    // Initial State - LED Off
+    // Initial State = Rainbow Format
     incomingCommand = 'O';
   }
 
@@ -224,9 +223,16 @@
       case 'P':
         if (DEBUG)
           Serial.println("Purple");
-        colorWipe(strip.Color(  10, 0,  3), 50); // Purple
+        colorWipe(strip.Color(  255, 0,  175), 50); // Purple
       break;
-    }
+
+      case 'V':
+        if (DEBUG)
+          Serial.println("Orange");
+        colorWipe(strip.Color(  211, 55,  0), 50); // Orange
+      break;
+
+      }
   }
 
   // Function for Serial Control
@@ -274,14 +280,17 @@
       incomingCommand = '9'; // White, half brightness
     else if (EQ == results.value)
       incomingCommand = 'P'; // Purple
-    else if ( (CH == results.value) || (VOL1 == results.value) || (VOL2 == results.value) ||
-            (BUTON0 == results.value) || (BUTON100 == results.value) || (BUTON200 == results.value) )
+    else if (VOL2 == results.value)
+      incomingCommand = 'V'; // Orange
+    else if ( (CH == results.value) || (VOL1 == results.value) || (BUTON0 == results.value)
+     || (BUTON100 == results.value) || (BUTON200 == results.value) )
       incomingCommand = 'W'; // Programmable Buttons
     else;
       // Nothing!
   }
   // Function for NeoPixel
   void colorWipe(uint32_t color, int wait) {
+    strip.setBrightness(LED_BRIGHTNESS_DEFAULT);
     for(int i=0; i<strip.numPixels(); i++) { // For each pixel in strip...
       strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
       strip.show();                          //  Update strip to match

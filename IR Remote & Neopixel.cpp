@@ -13,7 +13,6 @@
   void handlerIR();
   void controlButton();
   void controlLED();
-  void driveMotor();
 
   // Functions for LED
   void colorWipe(uint32_t color, int wait);
@@ -26,7 +25,6 @@
   Task taskHandlerIR(200, TASK_FOREVER, &handlerIR);
   Task taskControlButton(150, TASK_FOREVER, &controlButton);  // Normal 150
   Task taskControlLED(100, TASK_FOREVER, &controlLED);  // Normal 100
-  Task taskDriveMotor(50, TASK_FOREVER, &driveMotor); // Normal 50
 
   // Library for Remote Control
   #include <IRremote.h>
@@ -69,8 +67,8 @@
   #define LED_COUNT 12 // Number of LED
 
   // Definitions for DC Motor
-  #define DC_MOTOR_PIN 3 // Pin of DC Motor // // Arduino Nano/Uno -> 3 // ESP32 
-  #define DC_MOTOR_SPEED_DEFAULT 30 // Default speed of DC Motor (0-255)
+  #define DC_MOTOR_PIN 26 // Pin of DC Motor // // Arduino Nano/Uno -> 3 // ESP32 
+  #define DC_MOTOR_SPEED_DEFAULT 210 // Default speed of DC Motor (0-255)
   #define DC_MOTOR_SPEED_MIN 0 // 
 
   int LED_BRIGHTNESS_DEFAULT = 250; // Default LED Brightness
@@ -94,8 +92,10 @@
   char incomingCommand;
 
   bool MOTOR_STATE = false;
+  int MOTOR_COUNT = 0;
+
   // Definition for DEBUG (True = 1 or False = 0)
-  #define DEBUG 0
+  #define DEBUG 1
 
   void setup() {
     Serial.begin(115200); // FOR DEBUG
@@ -105,14 +105,12 @@
     st.addTask(taskHandlerIR);
     st.addTask(taskControlButton);
     st.addTask(taskControlLED);
-    st.addTask(taskDriveMotor);
 
     // We activate the tasks
     taskHandlerSerial.enable();
     taskHandlerIR.enable();
     taskControlButton.enable();
     taskControlLED.enable();
-    taskDriveMotor.disable();
 
     // We activate the LED
     strip.begin();
@@ -209,15 +207,15 @@
       case 'M':        
         if (DEBUG)
           Serial.println("Motor Off");
-        taskDriveMotor.disable();
-        incomingCommand = '7';
+        stopMotor();
+        // incomingCommand = '7';
       break;
 
       case 'N':
         if (DEBUG)
           Serial.println("Motor On");
-        taskDriveMotor.enable();
-        incomingCommand = '7';
+        startMotor();
+        // incomingCommand = '7';
       break;
 
       case 'P':
@@ -286,7 +284,6 @@
      || (BUTON100 == results.value) || (BUTON200 == results.value) )
       incomingCommand = 'W'; // Programmable Buttons
     else;
-      // Nothing!
   }
   // Function for NeoPixel
   void colorWipe(uint32_t color, int wait) {
@@ -339,8 +336,28 @@
   }
 
   // Function for DC Motor
-  void driveMotor() {
+  void startMotor() {
     if (DEBUG)
       Serial.println("Motor Running!");
-      analogWrite(DC_MOTOR_PIN, DC_MOTOR_SPEED_DEFAULT);
+    if (!MOTOR_STATE) {
+      analogWrite(DC_MOTOR_PIN,DC_MOTOR_SPEED_DEFAULT);
+      MOTOR_STATE = true;
+    }
+    
+      MOTOR_COUNT++;
+
+    // For the motor to run for 10 seconds.
+    if (MOTOR_COUNT > 100)
+    {
+      incomingCommand = 'M';
+    }
+  }
+
+  // Function for DC Motor
+  void stopMotor() {
+    if (DEBUG)
+      Serial.println("Motor Stopped");
+    analogWrite(DC_MOTOR_PIN,DC_MOTOR_SPEED_MIN);
+    MOTOR_STATE = false;
+    MOTOR_COUNT = 0;
   }
